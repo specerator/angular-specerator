@@ -1,0 +1,19 @@
+{
+  "name": "angular-specerator",
+  "version": "0.0.1",
+  "authors": [
+    "Jeff Loiselle <jeff@loiselles.com>"
+  ],
+  "main": "dist/angular-specerator.min.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "sails.io.js": "~0.11.6"
+  }
+}
