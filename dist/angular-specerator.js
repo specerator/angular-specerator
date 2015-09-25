@@ -13,20 +13,32 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
     };
   }
 
-  // this.request = function(opts) {
-  //   opts = opts || {};
-  //   opts.headers = _.merge(this.getHeaders(), opts.headers);
-  //   return $q(function(resolve, reject){
-  //     io.socket.request(opts, function(data, res){
-  //       if (res.statusCode >= 200 && res.statusCode <= 299) {
-  //         return resolve(data);
-  //       }
-  //       if (res.statusCode >= 400 && res.statusCode <= 599) {
-  //         return reject(res.error);
-  //       }
-  //     });
-  //   })
-  // };
+  this.isConnected = function() {
+    return new $q(function(resolve, reject){
+      if (io.socket.isConnected) {
+        return resolve(true);
+      }
+      io.socket.on('connect', function(){
+        return resolve(true);
+      });
+    });
+  };
+
+  this.request = function(opts) {
+    opts.headers = _.merge(this.getHeaders(), opts.headers);
+    return this.isConnected().then(function(){
+      return $q(function(resolve, reject){
+        io.socket.request(opts, function(data, res){
+          if (res.statusCode >= 200 && res.statusCode <= 299) {
+            return resolve(data);
+          }
+          if (res.statusCode >= 400 && res.statusCode <= 599) {
+            return reject(res.error);
+          }
+        });
+      })
+    });
+  };
 
   function buildUrl(url, parameters){
     var qs = "";
@@ -56,16 +68,6 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
   var methods = {
     on: function(cb) {
       io.socket.on(this.model, cb);
-    },
-    isConnected: function() {
-      return new $q(function(resolve, reject){
-        if (io.socket.isConnected) {
-          return resolve(true);
-        }
-        io.socket.on('connect', function(){
-          return resolve(true);
-        });
-      });
     },
     request: function(query, data, opts) {
       query = query || {};
@@ -155,7 +157,14 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
     },
     Story: {
       model: 'story',
-      url: '/projects/{{project}}/stories/{{story}}'
+      url: '/projects/{{project}}/stories/{{story}}',
+      sync: function(query, opts) {
+        options = {};
+        options.params = opts;
+        options.method = 'GET';
+        options.url = '/projects/{{project}}/stories/sync';
+        return this.request(query, {}, options);
+      }
     },
     User: {
       model: 'user',
@@ -171,39 +180,39 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
 
 });
 
-// angular.module('specerator').factory('Api', ['$resource', 'API_ENDPOINT',
-//     function($resource, API_ENDPOINT) {
-//         return {
-//             Document: $resource(API_ENDPOINT + '/projects/:project/documents/:id', {
-//                 project: '@project',
-//                 id: '@id'
-//             }),
-//             Integration: $resource(API_ENDPOINT + '/projects/:project/integrations/:id', {
-//                 project: '@project',
-//                 id: '@id'
-//             }),
-//             Project: $resource(API_ENDPOINT + '/projects/:id', {
-//                 id: '@id'
-//             }, {
-//                 report: {
-//                     method: 'GET',
-//                     params: {
-//                         id: 'report'
-//                     },
-//                     isArray: true
-//                 }
-//             }),
-//             Story: $resource(API_ENDPOINT + '/projects/:project/stories/:id', {
-//                 project: '@project',
-//                 id: '@id'
-//             }, {
-//                 update: {
-//                     method: 'PUT',
-//                     params: {
-//                         param1: '@id'
-//                     }
-//                 }
-//             }),
-//         }
-//     }
-// ]);
+angular.module('specerator').factory('Api', ['$resource', 'API_ENDPOINT',
+    function($resource, API_ENDPOINT) {
+        return {
+            Document: $resource(API_ENDPOINT + '/projects/:project/documents/:id', {
+                project: '@project',
+                id: '@id'
+            }),
+            Integration: $resource(API_ENDPOINT + '/projects/:project/integrations/:id', {
+                project: '@project',
+                id: '@id'
+            }),
+            Project: $resource(API_ENDPOINT + '/projects/:id', {
+                id: '@id'
+            }, {
+                report: {
+                    method: 'GET',
+                    params: {
+                        id: 'report'
+                    },
+                    isArray: true
+                }
+            }),
+            Story: $resource(API_ENDPOINT + '/projects/:project/stories/:id', {
+                project: '@project',
+                id: '@id'
+            }, {
+                update: {
+                    method: 'PUT',
+                    params: {
+                        param1: '@id'
+                    }
+                }
+            }),
+        }
+    }
+]);
