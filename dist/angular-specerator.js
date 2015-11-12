@@ -1,4 +1,5 @@
 // angular.module('specerator').value('API_ENDPOINT', io.sails.url);
+//
 
 angular.module('specerator.data', []).service('socketApiService', function($q){
 
@@ -28,7 +29,9 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
     opts.headers = _.merge(this.getHeaders(), opts.headers);
     return this.isConnected().then(function(){
       return $q(function(resolve, reject){
+        console.log(opts);
         io.socket.request(opts, function(data, res){
+          console.log(res);
           if (res.statusCode >= 200 && res.statusCode <= 299) {
             return resolve(data);
           }
@@ -144,8 +147,8 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
       url: '/projects/{{project}}/lists/{{list}}'
     },
     Passport: {
-        model: 'passport',
-        url: '/passports/{{passport}}'
+      model: 'passport',
+      url: '/passports/{{passport}}'
     },
     Project: {
       model: 'project',
@@ -180,39 +183,39 @@ angular.module('specerator.data', []).service('socketApiService', function($q){
 
 });
 
-angular.module('specerator').factory('Api', ['$resource', 'API_ENDPOINT',
-    function($resource, API_ENDPOINT) {
-        return {
-            Document: $resource(API_ENDPOINT + '/projects/:project/documents/:id', {
-                project: '@project',
-                id: '@id'
-            }),
-            Integration: $resource(API_ENDPOINT + '/projects/:project/integrations/:id', {
-                project: '@project',
-                id: '@id'
-            }),
-            Project: $resource(API_ENDPOINT + '/projects/:id', {
-                id: '@id'
-            }, {
-                report: {
-                    method: 'GET',
-                    params: {
-                        id: 'report'
-                    },
-                    isArray: true
-                }
-            }),
-            Story: $resource(API_ENDPOINT + '/projects/:project/stories/:id', {
-                project: '@project',
-                id: '@id'
-            }, {
-                update: {
-                    method: 'PUT',
-                    params: {
-                        param1: '@id'
-                    }
-                }
-            }),
-        }
-    }
-]);
+// angular.module('specerator').factory('Api', ['$resource', 'API_ENDPOINT',
+//     function($resource, API_ENDPOINT) {
+//         return {
+//             Document: $resource(API_ENDPOINT + '/projects/:project/documents/:id', {
+//                 project: '@project',
+//                 id: '@id'
+//             }),
+//             Integration: $resource(API_ENDPOINT + '/projects/:project/integrations/:id', {
+//                 project: '@project',
+//                 id: '@id'
+//             }),
+//             Project: $resource(API_ENDPOINT + '/projects/:id', {
+//                 id: '@id'
+//             }, {
+//                 report: {
+//                     method: 'GET',
+//                     params: {
+//                         id: 'report'
+//                     },
+//                     isArray: true
+//                 }
+//             }),
+//             Story: $resource(API_ENDPOINT + '/projects/:project/stories/:id', {
+//                 project: '@project',
+//                 id: '@id'
+//             }, {
+//                 update: {
+//                     method: 'PUT',
+//                     params: {
+//                         param1: '@id'
+//                     }
+//                 }
+//             }),
+//         }
+//     }
+// ]);
